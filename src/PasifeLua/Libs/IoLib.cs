@@ -9,7 +9,7 @@ namespace PasifeLua.Libs
         {
             int n = state.GetTop();
             for (int i = 1; i <= n; i++) {
-                Console.Write(state.Value(i).ToString());
+                state.StandardOut.Write(state.Value(i).ToString());
             }
             return 0;
         }

@@ -33,11 +33,11 @@ namespace PasifeLua.Libs
         {
             int n = state.GetTop();
             for (int i = 1; i <= n; i++) {
-                if(i > 1) Console.Write("\t");
-                Console.Write(state.Value(i).ToString(state));
+                if(i > 1) state.StandardOut.Write("\t");
+                state.StandardOut.Write(state.Value(i).ToString(state));
             }
             
-            Console.WriteLine();
+            state.StandardOut.WriteLine();
             return 0;
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using PasifeLua.Bytecode;
 using PasifeLua.Interop;
 using PasifeLua.Libs;
@@ -19,6 +20,8 @@ namespace PasifeLua
         public LuaTable Registry;
 
         private LuaTable loadedPackages;
+
+        public TextWriter StandardOut;
         public LuaState()
         {
             Registry = new LuaTable();
@@ -28,6 +31,7 @@ namespace PasifeLua
             loadedPackages = new LuaTable();
             Registry["_LOADED"] = new LuaValue(LuaType.Table, loadedPackages);
             luaRegistry = new LuaValue(LuaType.Table, Registry);
+            StandardOut = Console.Out;
             StackInit();
             BaseLib.Register(this);
             MathLib.Register(this);

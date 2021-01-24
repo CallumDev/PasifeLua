@@ -63,7 +63,7 @@ namespace PasifeLua.Interop
 
         internal void Set(object t, LuaValue key, LuaValue value)
         {
-            if (!value.AsString(out string s))
+            if (!key.AsString(out string s))
             {
                 if (ThrowOnKeyNotFound) throw new KeyNotFoundException($"{Type} has no setter for key " + key);
                 else return;

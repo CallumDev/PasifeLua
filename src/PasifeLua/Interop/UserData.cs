@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace PasifeLua.Interop
 {
@@ -7,18 +8,24 @@ namespace PasifeLua.Interop
     {
         private static Dictionary<Type, TypeDescriptor> Descriptors = new Dictionary<Type, TypeDescriptor>();
 
-        private static TypeDescriptor lastDescriptor;
+        private static ThreadLocal<TypeDescriptor> lastDescriptor = new ThreadLocal<TypeDescriptor>();
         public static TypeDescriptor GetDescriptor(Type t)
         {
-            if (lastDescriptor?.Type == t) return lastDescriptor;
-            if (Descriptors.TryGetValue(t, out var d))
-                lastDescriptor = d;
+            if (lastDescriptor.Value?.Type == t) return lastDescriptor.Value;
+            TypeDescriptor d;
+            lock (Descriptors) {
+                if (Descriptors.TryGetValue(t, out d))
+                    lastDescriptor.Value = d;
+            }
             return d;
         }
 
         public static void RegisterType(TypeDescriptor t)
         {
-            Descriptors[t.Type] = t;
+            lock (Descriptors)
+            {
+                Descriptors[t.Type] = t;
+            }
         }
     }
 }

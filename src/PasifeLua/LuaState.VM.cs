@@ -461,14 +461,23 @@ namespace PasifeLua
                         if(localStack[inst.A].IsNil())
                             throw new Exception("attempt to index nil value");
                         var tb = localStack[inst.A];
+                        var key = RKB(inst, fn, localStack);
+                        var val = RKC(inst, fn, localStack);
                         if (tb.Type == LuaType.UserData) {
-                            throw new NotImplementedException();
+                            
+                            TypeDescriptor td;
+                            if ((td = UserData.GetDescriptor(tb.obj.GetType())) != null) {
+                                td.Set(tb.obj, key, val);
+                                CheckStackframe(ref sref, ref localStack);
+                            } else {
+                                throw new Exception($"Descriptor for type {tb.obj.GetType()} not present");
+                            }
                         }
                         else
                         {
                             var oldci = ci;
                             var table = tb.Table();
-                            table.SetValue(RKB(inst, fn, localStack), RKC(inst, fn, localStack), this);
+                            table.SetValue(key, val, this);
                             LAssert(oldci == ci);
                             CheckStackframe(ref sref, ref localStack); //TM can modify stack
                         }

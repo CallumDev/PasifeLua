@@ -364,7 +364,6 @@ namespace PasifeLua.luac
         }
         
         static void closegoto (Lexer ls, int g, ref Labeldesc label) {
-            int i;
             FuncState fs = ls.fs;
             ref Labellist gl = ref ls.dyd.gt;
             ref Labeldesc gt = ref gl.arr[g];

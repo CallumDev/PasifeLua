@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using PasifeLua.Bytecode;
 using PasifeLua.Interop;
@@ -223,7 +225,7 @@ namespace PasifeLua
             DoJump(proto.Code[ci.SavedPC], 1);
         }
         
-        void BinOp(Instruction inst, LuaPrototype fn, Span<LuaValue> localStack, int ra, TMS tm)
+        void BinOp(Instruction inst, LuaPrototype fn, ref Span<LuaValue> localStack, ref LuaValue[] sref, int ra, TMS tm)
         {
             var rb = RKB(inst, fn, localStack);
             var rc = RKC(inst, fn, localStack);
@@ -232,6 +234,7 @@ namespace PasifeLua
             } else {
                 if(!CallBinTM(ref rb, ref rc, ra, tm))
                     throw new ArithmeticException();
+                CheckStackframe(ref sref, ref localStack);
             }
         }
 
@@ -242,6 +245,66 @@ namespace PasifeLua
                 sref = _Stack;
                 var closure = _Stack[ci.Func].Object<LuaFunction>();
                 localStack = new Span<LuaValue>(_Stack, ci.Base, closure.Prototype.MaxStackSize);
+            }
+        }
+
+        static LuaValue IndexList(IList list, int index)
+        {
+            index = index - 1;
+            if (index < 0 || index >= list.Count)
+                return new LuaValue();
+            if (list is IList<int> i)
+                return new LuaValue(i[index]);
+            else {
+                return LuaValue.FromObject(list[index]);
+            }
+        }
+
+        static void SetUserData(LuaValue tab, LuaValue key, LuaValue val)
+        {
+            TypeDescriptor td;
+            if ((td = UserData.GetDescriptor(tab.obj.GetType())) != null)
+            {
+                td.Set(tab.obj, key, val);
+            } else if (tab.obj is IList lst)
+            {
+                if (!key.TryGetNumber(out double idx))
+                    throw new Exception("expected number for IList index");
+                lst[(int) (idx - 1)] = val.Value;
+            } 
+            else if (tab.obj is IDictionary dict)
+            {
+                dict[key.Value] = val.Value;
+            } else {
+                throw new Exception($"Descriptor for type {tab.obj.GetType()} not present");
+            }
+        }
+        static LuaValue IndexUserData(LuaValue tab, LuaValue key, bool self)
+        {
+            TypeDescriptor td;
+            if ((td = UserData.GetDescriptor(tab.obj.GetType())) != null) {
+                var v = td.Get(tab.obj, key, self);
+                return  v;
+            } else if (tab.obj is IList lst) {
+                if (self || !key.TryGetNumber(out double idx)) {
+                    return IListInterop.GetFunction(key);
+                } else {
+                    return IndexList(lst, (int) idx);
+                }
+            } else if (tab.obj is IDictionary dict) {
+                if (self)
+                {
+                    return IDictionaryInterop.GetFunction(key);
+                } else {
+                    if (dict.Contains(key.Value)) {
+                        return LuaValue.FromObject(dict[key.Value]);
+                    }
+                    else {
+                        return new LuaValue();
+                    }
+                }
+            } else {
+                return new LuaValue(); //nil
             }
         }
 
@@ -262,32 +325,25 @@ namespace PasifeLua
                 {
                     /* BINARY OPERATORS */
                     case LuaOps.ADD:
-                        BinOp(inst, fn, localStack, ra, TMS.ADD);
-                        CheckStackframe(ref sref, ref localStack);
+                        BinOp(inst, fn, ref localStack, ref sref, ra, TMS.ADD);
                         break;
                     case LuaOps.SUB:
-                        BinOp(inst, fn, localStack, ra, TMS.SUB);
-                        CheckStackframe(ref sref, ref localStack);
+                        BinOp(inst, fn, ref localStack, ref sref, ra, TMS.SUB);
                         break;
                     case LuaOps.MUL:
-                        BinOp(inst, fn, localStack, ra, TMS.MUL);
-                        CheckStackframe(ref sref, ref localStack);
+                        BinOp(inst, fn, ref localStack, ref sref, ra, TMS.MUL);
                         break;
                     case LuaOps.DIV:
-                        BinOp(inst, fn, localStack, ra, TMS.DIV);
-                        CheckStackframe(ref sref, ref localStack);
+                        BinOp(inst, fn, ref localStack, ref sref, ra, TMS.DIV);
                         break;
                     case LuaOps.MOD:
-                        BinOp(inst, fn, localStack, ra, TMS.MOD);
-                        CheckStackframe(ref sref, ref localStack);
+                        BinOp(inst, fn, ref localStack, ref sref, ra, TMS.MOD);
                         break;
                     case LuaOps.POW:
-                        BinOp(inst, fn, localStack, ra, TMS.POW);
-                        CheckStackframe(ref sref, ref localStack);
+                        BinOp(inst, fn, ref localStack, ref sref, ra, TMS.POW);
                         break;
                     case LuaOps.UNM:
-                        BinOp(inst, fn, localStack, ra, TMS.UNM);
-                        CheckStackframe(ref sref, ref localStack);
+                        BinOp(inst, fn, ref localStack, ref sref, ra, TMS.UNM);
                         break;
                     /* UNARY FUNCTIONS */
                     case LuaOps.MOVE:
@@ -309,13 +365,20 @@ namespace PasifeLua
                             {
                                 if(v.Type == LuaType.Table)
                                     localStack[inst.A] = new LuaValue(v.Table().Length);
+                                else if(v.obj is IList list) {
+                                    localStack[inst.A] = new LuaValue(list.Count);
+                                    CheckStackframe(ref sref, ref localStack);
+                                } else if (v.obj is IDictionary dict) {
+                                    localStack[inst.A] = new LuaValue(dict.Count);
+                                    CheckStackframe(ref sref, ref localStack);
+                                }
                                 else {
-                                    throw new Exception();
+                                    throw new Exception($"cannot get length for object of type {v.obj.GetType()}");
                                 }
                             }
                         } 
                         else
-                            throw new Exception();
+                            throw new Exception($"attempt to get length of a {v.Type.ToString().ToLowerInvariant()} value");
                         break;
                     }
                     /* LOGICAL FUNCTIONS */
@@ -430,14 +493,8 @@ namespace PasifeLua
                         var tab = localStack[inst.B];
                         if (tab.Type == LuaType.UserData)
                         {
-                            TypeDescriptor td;
-                            if ((td = UserData.GetDescriptor(tab.obj.GetType())) != null) {
-                                var v = td.Get(tab.obj, key, inst.Op == LuaOps.SELF);
-                                CheckStackframe(ref sref, ref localStack); //TM can modify stack
-                                localStack[inst.A] = v;
-                            } else {
-                                localStack[inst.A] = new LuaValue(); //nil
-                            }
+                            localStack[inst.A] = IndexUserData(tab, key, inst.Op == LuaOps.SELF);
+                            CheckStackframe(ref sref, ref localStack);
                         }
                         else
                         {
@@ -463,15 +520,9 @@ namespace PasifeLua
                         var tb = localStack[inst.A];
                         var key = RKB(inst, fn, localStack);
                         var val = RKC(inst, fn, localStack);
-                        if (tb.Type == LuaType.UserData) {
-                            
-                            TypeDescriptor td;
-                            if ((td = UserData.GetDescriptor(tb.obj.GetType())) != null) {
-                                td.Set(tb.obj, key, val);
-                                CheckStackframe(ref sref, ref localStack);
-                            } else {
-                                throw new Exception($"Descriptor for type {tb.obj.GetType()} not present");
-                            }
+                        if (tb.Type == LuaType.UserData)
+                        {
+                            SetUserData(tb, key, val);
                         }
                         else
                         {
@@ -531,8 +582,20 @@ namespace PasifeLua
                     /* UPVALUES */
                     case LuaOps.SETTABUP:
                     {
-                        var tab = closure.UpValues[inst.A].Value().Table();
-                        tab.SetValue(RKB(inst, fn, localStack), RKC(inst, fn, localStack), this);
+                        var tab = closure.UpValues[inst.A].Value();
+                        if (tab.IsNil()) throw new Exception("attempted to index a nil value");
+                        var key = RKB(inst, fn, localStack);
+                        var val = RKC(inst, fn, localStack);
+                        if (tab.Type == LuaType.UserData)
+                        {
+                            SetUserData(tab,key,val);
+                        } 
+                        else if (tab.Type == LuaType.Table)
+                        {
+                            tab.Table().SetValue(key, val, this);
+                        }
+                        else
+                            throw new Exception("cannot index type");
                         CheckStackframe(ref sref, ref localStack);
                         break;
                     }
@@ -540,17 +603,27 @@ namespace PasifeLua
                     case LuaOps.GETTABUP:
                     {
                         var tab = closure.UpValues[inst.B].Value();
+                        if (tab.IsNil()) throw new Exception("attempted to index a nil value");
                         var key = RKC(inst, fn, localStack);
-                        var val = tab.Table()[key];
-                        if (val.IsNil())
+                        if (tab.Type == LuaType.UserData)
                         {
-                            if (CallBinTM(ref tab, ref key, ra, TMS.INDEX))
-                            {
-                                CheckStackframe(ref sref, ref localStack);
-                                break;
-                            }
+                            localStack[inst.A] = IndexUserData(tab, key, false);
+                            CheckStackframe(ref sref, ref localStack);
                         }
-                        localStack[inst.A] = val;
+                        else
+                        {
+                            var val = tab.Table()[key];
+                            if (val.IsNil())
+                            {
+                                if (CallBinTM(ref tab, ref key, ra, TMS.INDEX))
+                                {
+                                    CheckStackframe(ref sref, ref localStack);
+                                    break;
+                                }
+                            }
+                            localStack[inst.A] = val;
+                        }
+
                         break;
                     }
                     case LuaOps.GETUPVAL:

@@ -63,5 +63,6 @@ namespace PasifeLua.Tests
             state.DoString("print(inst.SetString)");
             Assert.Equal("hello", sw.ToString().Trim());
         }
+        
     }
 }

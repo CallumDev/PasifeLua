@@ -21,6 +21,16 @@ namespace PasifeLua.Libs
                 TypeError(argNo, func, LuaType.Number, x.Type);
             return n;
         }
+
+        public static uint GetUnsigned(LuaState state, int argNo, string func)
+        {
+            return (uint) GetNumber(state, argNo, func);
+        }
+
+        public static int GetSigned(LuaState state, int argNo, string func)
+        {
+            return (int) GetNumber(state, argNo, func);
+        }
         
         public static string GetString(LuaState state, int argNo, string func)
         {
@@ -30,6 +40,10 @@ namespace PasifeLua.Libs
             return n;
         }
 
+        public static void ArgCheck(bool cond, int argNo, string func, string reason)
+        {
+            if (!cond) ArgError(argNo, func, reason);
+        }
         public static void ArgError(int argNo, string func, string reason)
         {
             throw new Exception($"bad argument #{argNo} to '{func}' ({reason})");

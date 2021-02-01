@@ -34,6 +34,7 @@ namespace PasifeLua
             StandardOut = Console.Out;
             StackInit();
             BaseLib.Register(this);
+            BitLib.Register(this);
             MathLib.Register(this);
             TableLib.Register(this);
             OsLib.Register(this);

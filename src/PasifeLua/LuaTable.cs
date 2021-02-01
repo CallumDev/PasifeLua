@@ -50,7 +50,6 @@ namespace PasifeLua
 		private int freeTopIndex = -1;                            // Start of the free lists
 
 		private int arrayLength = 0;                              // Current length of the array list
-		private int memberCount = 0;                              // Current length of the member list 
 
 		private int count = 0;                                    // Number of element in the Key/Value part
 
@@ -106,7 +105,6 @@ namespace PasifeLua
 				return -1;
 
 			var hashIndex = hashCode % hashLength;
-			var lastIndex = -1;
 			for (var i = hashLists[hashIndex]; i >= 0; i = entries[i].nextHash)
 			{
 				if (entries[i].hashCode == hashCode && entries[i].key == key) 

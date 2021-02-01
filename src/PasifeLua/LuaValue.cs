@@ -22,6 +22,8 @@ namespace PasifeLua
                 return (T) obj;
             throw new InvalidCastException();
         }
+        
+        
 
         public double Number()
         {
@@ -50,6 +52,17 @@ namespace PasifeLua
                 type == LuaType.Boolean)
                 return number != 0;
             return obj != null;
+        }
+
+        public object Value
+        {
+            get
+            {
+                if (type == LuaType.Nil) return null;
+                if (type == LuaType.Number) return number;
+                if (type == LuaType.Boolean) return number != 0;
+                return obj;
+            }
         }
 
         public LuaTable Table()
@@ -251,6 +264,44 @@ namespace PasifeLua
             }
             throw new Exception("arithmetic error");
         }
-        
+
+        public static LuaValue FromObject(object o)
+        {
+            switch (o)
+            {
+                case null:
+                    return new LuaValue();
+                case bool b:
+                    return new LuaValue(b);
+                case string s:
+                    return new LuaValue(s);
+                case int i:
+                    return new LuaValue(i);
+                case uint u:
+                    return new LuaValue(u);
+                case short s:
+                    return new LuaValue(s);
+                case ushort us:
+                    return new LuaValue(us);
+                case long l:
+                    return new LuaValue(l);
+                case ulong ul:
+                    return new LuaValue(ul);
+                case sbyte sb:
+                    return new LuaValue(sb);
+                case byte by:
+                    return new LuaValue(by);
+                case float f:
+                    return new LuaValue(f);
+                case double d:
+                    return new LuaValue(d);
+                case ClrFunction clr:
+                    return new LuaValue(LuaType.LightUserData, o);
+                case LuaTable table:
+                    return new LuaValue(LuaType.Table, o);
+                default:
+                    return new LuaValue(LuaType.UserData, o);
+            }
+        }
     }
 }

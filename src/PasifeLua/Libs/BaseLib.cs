@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using PasifeLua.Bytecode;
@@ -6,7 +7,7 @@ using PasifeLua.Interop;
 
 namespace PasifeLua.Libs
 {
-    public static class BaseLib
+    public static partial class BaseLib
     {
         public static int assert(LuaState state)
         {
@@ -140,56 +141,7 @@ namespace PasifeLua.Libs
                 state.Push(new LuaValue(tab));
             return 1;
         }
-
-        static int ipairsimpl(LuaState s)
-        {
-            var tab = s.Value(1).Table();
-            var i = (int)s.Value(2).Number();
-            i++;
-            s.Push(i);
-            var x = tab[i];
-            s.Push(x);
-            if (x.IsNil()) return 1;
-            else return 2;
-        }
-        static DelegateClrFunction ipairsDel = new DelegateClrFunction(ipairsimpl);
-        static int pairsimpl(LuaState s, IEnumerator<KeyValuePair<LuaValue,LuaValue>> it)
-        {
-            if (it.MoveNext()) {
-                s.Push(it.Current.Key);
-                s.Push(it.Current.Value);
-                return 2;
-            } else {
-                s.Push(new LuaValue(LuaType.Nil));
-                s.Push(new LuaValue(LuaType.Nil));
-                return 1;
-            }
-        }
         
-        public static int ipairs(LuaState state)
-        {
-            var tab = state.Value(1).Table();
-            //generator
-            state.Push(new LuaValue(ipairsDel));
-            //state
-            state.Push(state.Value(1));
-            //initial value
-            state.Push(0);
-            return 3;
-        }
-
-        public static int pairs(LuaState state)
-        {
-            var tab = state.Value(1).Table();
-            var it = tab.GetEnumerator();
-            state.Push(new LuaValue(new DelegateClrFunction((s) =>
-            {
-                return pairsimpl(s, it);
-            })));
-            state.Push(state.Value(1));
-            state.Push(0);
-            return 3;
-        }
 
         private static (string, DelegateClrFunction)[] funcs =
         {
@@ -206,10 +158,10 @@ namespace PasifeLua.Libs
             ("ipairs", new DelegateClrFunction(ipairs)),
             ("pairs", new DelegateClrFunction(pairs))
         };
+        
         public static void Register(LuaState state)
         {
             var e = state.Globals;
-
             state.AddLib("_G", e);
             foreach (var (name, func) in funcs) {
                 e[name] = new LuaValue(func);

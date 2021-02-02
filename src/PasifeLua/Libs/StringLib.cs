@@ -36,6 +36,55 @@ namespace PasifeLua.Libs
             sp = p;
         }
 
+        static string MakeLiteral(string s)
+        {
+            if (s == null || s.Length == 0) {
+                return "\"\"";
+            }
+            char         c = '\0';
+            StringBuilder sb = new StringBuilder(s.Length + 4);
+            sb.Append('"');
+            String     t;
+            for (int i = 0; i < s.Length; i++) {
+                c = s[i];
+                switch (c) {
+                    case '\\':
+                    case '"':
+                        sb.Append('\\');
+                        sb.Append(c);
+                        break;
+                    case '\0':
+                        sb.Append("\\000");
+                        break;
+                    case '\b':
+                        sb.Append("\\b");
+                        break;
+                    case '\t':
+                        sb.Append("\\t");
+                        break;
+                    case '\n':
+                        sb.Append("\\n");
+                        break;
+                    case '\f':
+                        sb.Append("\\f");
+                        break;
+                    case '\r':
+                        sb.Append("\\r");
+                        break;
+                    default:
+                        if (c < ' ')
+                        {
+                            sb.Append("\\u").Append(((int) c).ToString("X4"));
+                        } else {
+                            sb.Append(c);
+                        }
+                        break;
+                }
+            }
+            sb.Append('"');
+            return sb.ToString();
+        }
+
         public static int format(LuaState state)
         {
             int top = state.GetTop();
@@ -66,6 +115,9 @@ namespace PasifeLua.Libs
                             break;
                         case 'o': case 'u': case 'x': case 'X':
                             buf.Append(libc.sprintf(form, (uint)state.Value(arg).Number()));
+                            break;
+                        case 'q':
+                            buf.Append(MakeLiteral(state.Value(arg).ToString()));
                             break;
                         case 'e':
                         case 'E':
@@ -220,7 +272,12 @@ namespace PasifeLua.Libs
             ("format", new DelegateClrFunction(format)),
             ("reverse", new DelegateClrFunction(reverse)),
             ("rep", new DelegateClrFunction(rep)),
-            ("sub", new DelegateClrFunction(sub))
+            ("sub", new DelegateClrFunction(sub)),
+            //kopilua functions
+            ("find", new DelegateClrFunction(KopiLua_StringLib.str_find)),
+            ("match", new DelegateClrFunction(KopiLua_StringLib.str_match)),
+            ("gsub", new DelegateClrFunction(KopiLua_StringLib.str_gsub)),
+            ("gmatch", new DelegateClrFunction(KopiLua_StringLib.str_gmatch))
         };
         public static LuaTable Register(LuaState state)
         {

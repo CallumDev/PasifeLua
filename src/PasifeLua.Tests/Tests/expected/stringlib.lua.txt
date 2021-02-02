@@ -1,0 +1,21 @@
+7	9
+2 questions
+2, "questions"
+Hello
+Lua
+user
+Hello Lua user	1
+bAnAna	2
+ban-an-a	2
+ba(n)a(n)a	2
+bnanaa	2
+Hello
+Lua
+user
+5 3 4	3
+bAnAnA	3
+bnanaa	2
+brown
+over
+dog
+brown} fox jumped {over} the lazy {dog

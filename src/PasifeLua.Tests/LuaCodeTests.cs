@@ -8,15 +8,11 @@ namespace PasifeLua.Tests
 {
     public class LuaCodeTestData : IEnumerable<object[]>
     {
-        private static readonly string[] FILES =
-        {
-            "hello.lua"
-        };
 
         public IEnumerator<object[]> GetEnumerator()
         {
-            foreach (var s in FILES)
-                yield return new object[] {s};
+            foreach (var s in Directory.GetFiles("Tests", "*.lua"))
+                yield return new object[] { Path.GetFileName(s) };
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -27,6 +23,7 @@ namespace PasifeLua.Tests
         {
             var writer = new StringWriter();
             var state = new LuaState() {StandardOut = writer};
+            state.DoString("arg = {}");
             state.DoString(File.ReadAllText(file), Path.GetFileName(file));
             return writer.ToString().Trim();
         }

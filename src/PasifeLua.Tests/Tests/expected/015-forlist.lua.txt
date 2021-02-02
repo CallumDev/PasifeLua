@@ -1,0 +1,19 @@
+1..18
+ok 1 - for ipairs
+ok 2 - for ipairs
+ok 3 - for ipairs
+ok 4 - for ipairs
+ok 5 - for ipairs
+ok 6 - for ipairs
+ok 7 - for ipairs (hash)
+ok 8 - for pairs
+ok 9 - for pairs
+ok 10 - for pairs
+ok 11 - for pairs (hash)
+ok 12 - for pairs (hash)
+ok 13 - for break
+ok 14 - for break
+ok 15 - break
+ok 16 - for & upval
+ok 17 - for & upval
+ok 18 - for & upval

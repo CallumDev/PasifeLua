@@ -355,6 +355,9 @@ namespace PasifeLua
                     case LuaOps.UNM:
                         BinOp(inst, fn, ref localStack, ref sref, ra, TMS.UNM);
                         break;
+                    case LuaOps.NOT:
+                        localStack[inst.A] = new LuaValue(!localStack[inst.B].Boolean());
+                        break;
                     /* UNARY FUNCTIONS */
                     case LuaOps.MOVE:
                     {

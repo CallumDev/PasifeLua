@@ -1,0 +1,37 @@
+1..36
+ok 1 - for 1, 10, 2
+ok 2 - for 1, 10, 2
+ok 3 - for 1, 10, 2
+ok 4 - for 1, 10, 2
+ok 5 - for 1, 10, 2
+ok 6 - for 1, 10, 2 lex
+ok 7 - for 1, 10, 2 lex
+ok 8 - for 1, 10, 2 lex
+ok 9 - for 1, 10, 2 lex
+ok 10 - for 1, 10, 2 lex
+ok 11 - for 1, 10, 2 !lex
+ok 12 - for 1, 10, 2 !lex
+ok 13 - for 1, 10, 2 !lex
+ok 14 - for 1, 10, 2 !lex
+ok 15 - for 1, 10, 2 !lex
+ok 16 - for 3, 5
+ok 17 - for 3, 5
+ok 18 - for 3, 5
+ok 19 - for 5, 1, -1
+ok 20 - for 5, 1, -1
+ok 21 - for 5, 1, -1
+ok 22 - for 5, 1, -1
+ok 23 - for 5, 1, -1
+ok 24 - for 5, 5
+ok 25 - for 5, 5, -1
+ok 26 - for 5, 3
+ok 27 - for 5, 7, -1
+ok 28 - for 5, 7, 0
+ok 29 - for break
+ok 30 - for break
+ok 31 - break
+ok 32 - with functions
+ok 33 - with functions
+ok 34 - with functions
+ok 35 - with functions
+ok 36 - for & upval

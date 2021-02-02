@@ -1,0 +1,10 @@
+1..9
+ok 1 -
+ok	2	- list
+ok 3 - concatenation
+ok 4 - var
+ok 5 - var incr
+ok 6 - expr
+ok 7 - call f
+ok 8 - call g
+ok 9 - local

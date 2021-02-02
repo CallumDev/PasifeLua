@@ -127,8 +127,10 @@ namespace PasifeLua.Libs
             var table = state.Value(1).Table();
             var mt = state.Value(2).Table();
             table.MetaTable = mt;
-            return 0;
+            state.Push(state.Value(1)); //push the table
+            return 1;
         }
+        
 
         public static int getmetatable(LuaState state)
         {
@@ -139,6 +141,14 @@ namespace PasifeLua.Libs
                 state.Push(new LuaValue());
             else
                 state.Push(new LuaValue(tab));
+            return 1;
+        }
+
+        public static int rawget(LuaState state)
+        {
+            var table = state.Value(1).Table();
+            var key = state.Value(2);
+            state.Push(table[key]);
             return 1;
         }
         
@@ -156,7 +166,8 @@ namespace PasifeLua.Libs
             ("getmetatable", new DelegateClrFunction(getmetatable)),
             ("type", new DelegateClrFunction(type)),
             ("ipairs", new DelegateClrFunction(ipairs)),
-            ("pairs", new DelegateClrFunction(pairs))
+            ("pairs", new DelegateClrFunction(pairs)),
+            ("rawget", new DelegateClrFunction(rawget)),
         };
         
         public static void Register(LuaState state)

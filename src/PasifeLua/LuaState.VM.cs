@@ -158,6 +158,16 @@ namespace PasifeLua
             if (tm.IsNil())
                 tm = TM.GetTMByObj(this, p2, ev);
             if (tm.IsNil()) return false;
+            if (ev == TMS.INDEX && tm.Type == LuaType.Table) {
+                var val = tm.Table()[p2];
+                if (val.IsNil()) {
+                    return CallBinTM(ref tm, ref p2, res, TMS.INDEX);
+                }
+                else {
+                    _Stack[res] = val;
+                    return true;
+                }
+            }
             CallTagMethod(ref tm, ref p1, ref p2, res, true);
             return true;
         }
@@ -496,6 +506,10 @@ namespace PasifeLua
                             localStack[inst.A] = IndexUserData(tab, key, inst.Op == LuaOps.SELF);
                             CheckStackframe(ref sref, ref localStack);
                         }
+                        else if(tab.Type == LuaType.String)
+                        {
+                            localStack[inst.A] = stringLib[key];
+                        }
                         else
                         {
                             var val = tab.Table()[key];
@@ -589,7 +603,7 @@ namespace PasifeLua
                         if (tab.Type == LuaType.UserData)
                         {
                             SetUserData(tab,key,val);
-                        } 
+                        }
                         else if (tab.Type == LuaType.Table)
                         {
                             tab.Table().SetValue(key, val, this);
@@ -609,6 +623,10 @@ namespace PasifeLua
                         {
                             localStack[inst.A] = IndexUserData(tab, key, false);
                             CheckStackframe(ref sref, ref localStack);
+                        }
+                        else if (tab.Type == LuaType.String)
+                        {
+                            localStack[inst.A] = stringLib[key];
                         }
                         else
                         {

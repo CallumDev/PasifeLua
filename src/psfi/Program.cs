@@ -106,7 +106,14 @@ end
         {
             try
             {
-                var c = state.CreateClosure(new LuaChunk(stream, name));
+                string src;
+                using (var sr = new StreamReader(stream)) {
+                    src = sr.ReadToEnd();
+                }
+                if (src.StartsWith("#!")) {
+                    src = src.Substring(src.IndexOf('\n'));
+                }
+                var c = state.CreateClosure(new LuaChunk(src, name));
                 
                 state.CallFunction(new LuaValue(c), false);
                 return 0;
@@ -143,15 +150,19 @@ end
                 Console.Write("> ");
                 var chnk = GetChunk(Console.ReadLine());
                 if (chnk == null) continue;
+#if !DEBUG
                 try
                 {
+#endif
                     var c = state.CreateClosure(chnk);
                     state.CallFunction(new LuaValue(c), false);
+#if !DEBUG
                 }
                 catch (Exception e) {
                     Console.Error.WriteLine(e.Message);
                     Console.Error.WriteLine(e.InnerException?.StackTrace);
                 }
+#endif
             }
         }
         

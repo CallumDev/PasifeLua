@@ -22,6 +22,7 @@ namespace PasifeLua
         private LuaTable loadedPackages;
 
         public TextWriter StandardOut;
+        private LuaTable stringLib;
         public LuaState()
         {
             Registry = new LuaTable();
@@ -38,9 +39,10 @@ namespace PasifeLua
             MathLib.Register(this);
             TableLib.Register(this);
             OsLib.Register(this);
-            StringLib.Register(this);
+            stringLib = StringLib.Register(this);
             IoLib.Register(this);
             PackageLib.Register(this);
+            DebugLib.Register(this);
         }
 
         internal void AddLib(string name, LuaTable table)
@@ -84,11 +86,18 @@ namespace PasifeLua
             return returnVal;
         }
 
-        public void DoString(string code, string src = null)
+        public LuaValue DoString(string code, string src = null)
         {
             var chunk = new LuaChunk(code, src ?? "<chunk>");
             var closure = CreateClosure(chunk);
-            CallFunction(new LuaValue(closure), false);
+            return CallFunction(new LuaValue(closure), true);
+        }
+
+        internal string ReadLuaModule(string path)
+        {
+            if (File.Exists(path))
+                return File.ReadAllText(path);
+            return null;
         }
 
         string ErrorRecover(CallInfo originalCi, int oldtop)
@@ -180,5 +189,6 @@ namespace PasifeLua
             Call(func, nresults, 0);
             adjustresults(nresults);
         }
+        
     }
 }

@@ -393,12 +393,18 @@ namespace PasifeLua
 				var hashCode = key.GetHashCode() & 0x7FFFFFFF;
 				index = FindKey(key, hashCode); // find the value
 
-				if (value.IsNil()) // remove value
-					RemoveValue(index);
-				else if (index < 0 && (state == null || CallTM__newIndex(state, new LuaValue(index), value))) // insert value
+				if (value.IsNil())
+				{
+					// remove value
+					if (index >= 0) RemoveValue(index);
+				}
+				else if (index < 0 && (state == null || CallTM__newIndex(state, key, value))) // insert value
 					InsertValue(key, hashCode, value);
-				else // update value
+				else if(index >= 0)
+				{
+					// update value
 					entries[index].value = value;
+				}
 			}
 		}
 

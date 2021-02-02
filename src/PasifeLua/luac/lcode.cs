@@ -217,8 +217,8 @@ namespace PasifeLua.luac
         static int luaK_code(FuncState fs, Instruction i)
         {
             dischargejpc(fs);
-            fs.f.Code.Add(i);
-            fs.f.LineInfo.Add(fs.ls.lastline);
+            fs.f.Code.SetOrAdd(fs.pc, i);
+            fs.f.LineInfo.SetOrAdd(fs.pc, fs.ls.lastline);
             return fs.pc++;
         }
 

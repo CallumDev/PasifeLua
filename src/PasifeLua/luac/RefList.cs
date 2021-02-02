@@ -28,6 +28,14 @@ namespace PasifeLua.luac
             backing[n++] = item;
         }
 
+        public void SetOrAdd(int i, T item)
+        {
+            if (i >= n) n = i + 1;
+            if (backing.Length < n + 1 + (withspace ? 5 : 0))
+                Grow();
+            backing[i] = item;
+        }
+
         public void RemoveEnd(int count)
         {
             ShrinkTo(n - count);

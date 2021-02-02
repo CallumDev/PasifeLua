@@ -222,9 +222,9 @@ namespace PasifeLua.Libs
             ("rep", new DelegateClrFunction(rep)),
             ("sub", new DelegateClrFunction(sub))
         };
-        public static void Register(LuaState state)
+        public static LuaTable Register(LuaState state)
         {
-            LibUtils.CreateLib(state, "string", funcs);
+            return LibUtils.CreateLib(state, "string", funcs);
         }
     }
 }

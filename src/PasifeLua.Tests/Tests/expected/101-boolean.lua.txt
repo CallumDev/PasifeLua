@@ -1,0 +1,25 @@
+1..24
+ok 1 - -true
+ok 2 - #true
+ok 3 - not false
+ok 4 - true + 10
+ok 5 - true - 2
+ok 6 - true * 3.14
+ok 7 - true / -7
+ok 8 - true % 4
+ok 9 - true ^ 3
+ok 10 - true .. 'end'
+ok 11 - true == true
+ok 12 - true ~= false
+ok 13 - true == 1
+ok 14 - true ~= 1
+ok 15 - true < false
+ok 16 - true <= false
+ok 17 - true > false
+ok 18 - true >= false
+ok 19 - true < 0
+ok 20 - true <= 0
+ok 21 - true > 0
+ok 22 - true >= 0
+ok 23 - index
+ok 24 - index

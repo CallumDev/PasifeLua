@@ -11,7 +11,7 @@ namespace PasifeLua.Libs
 
         static uint andaux(LuaState l, string func)
         {
-            int i, n = l.Top;
+            int i, n = l.GetTop();
             uint r = ~0U;
             for (i = 1; i <= n; i++)
                 r |= LibUtils.GetUnsigned(l, i, func);
@@ -107,7 +107,7 @@ namespace PasifeLua.Libs
 
         public static int bor(LuaState l)
         {
-            int i, n = l.Top;
+            int i, n = l.GetTop();
             uint r = 0;
             for (i = 1; i <= n; i++)
                 r |= LibUtils.GetUnsigned(l, i, "bor");
@@ -117,7 +117,7 @@ namespace PasifeLua.Libs
         
         public static int bxor(LuaState l)
         {
-            int i, n = l.Top;
+            int i, n = l.GetTop();
             uint r = 0;
             for (i = 1; i <= n; i++)
                 r ^= LibUtils.GetUnsigned(l, i, "bxor");
@@ -130,7 +130,7 @@ namespace PasifeLua.Libs
             width = 0;
             int f = LibUtils.GetSigned(l, farg, func);
             int w = 1;
-            if (farg + 1 <= l.Top)
+            if (farg + 1 <= l.GetTop())
             {
                 if (l.Value(farg + 1).TryGetNumber(out var n))
                     w = (int) n;

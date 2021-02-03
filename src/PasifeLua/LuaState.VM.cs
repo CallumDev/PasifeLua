@@ -25,9 +25,18 @@ namespace PasifeLua
         
         static LuaValue Concat(Span<LuaValue> stackView, int b, int c)
         {
-            var str = stackView[b++].ToString();
-            while (b <= c) {
-                str += stackView[b++];
+            //var str = stackView[b++].ToString();
+            var l = stackView[b++];
+            if (!l.AsString(out var str)) {
+                throw new Exception($"attempt to concatenate a {l.Type.LuaName()} value");
+            }
+            while (b <= c)
+            {
+                l = stackView[b++];
+                if (!l.AsString(out var s2)) {
+                    throw new Exception($"attempt to concatenate a {l.Type.LuaName()} value");
+                }
+                str += s2;
             }
             return new LuaValue(LuaType.String, str);
         }
@@ -185,7 +194,8 @@ namespace PasifeLua
         {
             x = 0;
             if (!a.TryGetNumber(out var na)) return false;
-            if (!b.TryGetNumber(out var nb)) return false;
+            double nb = 0;
+            if (op != TMS.UNM && !b.TryGetNumber(out nb)) return false;
             switch (op) {
                 case TMS.ADD:
                     x = na + nb;
@@ -200,7 +210,8 @@ namespace PasifeLua
                     x = na / nb;
                     break;
                 case TMS.MOD:
-                    x = na % nb;
+                    //Not the same as IEEE mod - Lua specific
+                    x = na - Math.Floor(na / nb) * nb;
                     break;
                 case TMS.POW:
                     x = Math.Pow(na, nb);
@@ -242,8 +253,13 @@ namespace PasifeLua
             if (NumberArith(tm, rb, rc, out var x)) {
                 localStack[inst.A] = new LuaValue(x);
             } else {
-                if(!CallBinTM(ref rb, ref rc, ra, tm))
-                    throw new ArithmeticException();
+                if (!CallBinTM(ref rb, ref rc, ra, tm))
+                {
+                    LuaType type = rb.Type;
+                    if (rb.TryGetNumber(out _))
+                        type = rc.Type;
+                    throw new Exception($"attempt to perform arithmetic on a {type.LuaName()} value");
+                }
                 CheckStackframe(ref sref, ref localStack);
             }
         }
@@ -499,8 +515,7 @@ namespace PasifeLua
                     }
                     case LuaOps.GETTABLE:
                     {
-                        if(localStack[inst.B].IsNil())
-                            throw new Exception("attempt to index nil value");
+                        if(localStack[inst.B].IsNil()) throw new Exception("attempt to index nil value");
                         var oldci = ci;
                         var key = RKC(inst, fn, localStack);
                         var tab = localStack[inst.B];
@@ -513,7 +528,7 @@ namespace PasifeLua
                         {
                             localStack[inst.A] = stringLib[key];
                         }
-                        else
+                        else if(tab.Type == LuaType.Table)
                         {
                             var val = tab.Table()[key];
                             if (val.IsNil())
@@ -527,7 +542,10 @@ namespace PasifeLua
                             }
                             localStack[inst.A] = val;
                         }
-
+                        else
+                        {
+                            throw new Exception($"attempt to index {tab.Type.LuaName()} value");
+                        }
                         break;
                     }
                     case LuaOps.SETTABLE:
@@ -541,13 +559,15 @@ namespace PasifeLua
                         {
                             SetUserData(tb, key, val);
                         }
-                        else
+                        else if (tb.Type == LuaType.Table)
                         {
                             var oldci = ci;
                             var table = tb.Table();
                             table.SetValue(key, val, this);
                             LAssert(oldci == ci);
                             CheckStackframe(ref sref, ref localStack); //TM can modify stack
+                        } else {
+                            throw new Exception($"attempt to index {tb.Type.LuaName()} value");
                         }
                         break;
                     }

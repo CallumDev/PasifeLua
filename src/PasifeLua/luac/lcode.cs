@@ -687,7 +687,7 @@ namespace PasifeLua.luac
                 case LuaOps.DIV:
                     return a / b;
                 case LuaOps.MOD:
-                    return a % b;
+                    return a - Math.Floor(a / b) * b;
                 case LuaOps.POW:
                     return Math.Pow(a, b);
                 default:

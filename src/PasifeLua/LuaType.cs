@@ -14,9 +14,10 @@ namespace PasifeLua
 
     public static class LuaTypeExtensions
     {
+        //HACK: lightuserdata mapped to function for lua
         static readonly string[] _luanames =
         {
-            "nil", "boolean", "lightuserdata", "number", "string", "table", "function", "userdata"
+            "nil", "boolean", "function", "number", "string", "table", "function", "userdata"
         };
         public static string LuaName(this LuaType type)
         {

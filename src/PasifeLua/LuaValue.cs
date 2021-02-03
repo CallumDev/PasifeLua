@@ -9,6 +9,8 @@ namespace PasifeLua
         public LuaType Type => type;
 
         public bool IsNil() => Type == LuaType.Nil;
+
+        public static LuaValue Nil { get; } = new LuaValue();
         
         internal readonly double number;
         internal readonly object obj;
@@ -33,7 +35,7 @@ namespace PasifeLua
         }
         public bool TryGetNumber(out double n)
         {
-            if (type == LuaType.Number || type == LuaType.Boolean)
+            if (type == LuaType.Number)
             {
                 n = number;
                 return true;
@@ -228,9 +230,8 @@ namespace PasifeLua
 
         public static bool LessThan(LuaState state, LuaValue a, LuaValue b)
         {
-            if(a.Type == LuaType.Nil && b.Type == LuaType.Nil) throw new Exception("attempt to compare two nil values");
-            if ((a.Type == LuaType.Number || a.Type == LuaType.Boolean) &&
-                (b.Type == LuaType.Number || b.Type == LuaType.Boolean))
+            if ((a.Type == LuaType.Number) &&
+                (b.Type == LuaType.Number))
                 return a.number < b.number;
             if (a.Type == LuaType.String && b.Type == LuaType.String)
             {
@@ -241,14 +242,16 @@ namespace PasifeLua
             if (state.CallOrderTM(ref a, ref b, TMS.LT, out var res)) {
                 return res;
             }
-            throw new Exception("order method");
+            if (a.Type.LuaName() == b.Type.LuaName())
+                throw new Exception($"attempt to compare two {a.Type.LuaName()} values");
+            else
+                throw new Exception($"attempt to compare {a.Type.LuaName()} with {b.Type.LuaName()}");
         }
 
         public static bool LessEquals(LuaState state, LuaValue a, LuaValue b)
         {
-            if(a.Type == LuaType.Nil && b.Type == LuaType.Nil) throw new Exception("attempt to compare two nil values");
-            if ((a.Type == LuaType.Number || a.Type == LuaType.Boolean) &&
-                (b.Type == LuaType.Number || b.Type == LuaType.Boolean))
+            if ((a.Type == LuaType.Number) &&
+                (b.Type == LuaType.Number))
                 return a.number <= b.number;
             if (a.Type == LuaType.String && b.Type == LuaType.String)
             {
@@ -262,7 +265,10 @@ namespace PasifeLua
             if (state.CallOrderTM(ref b, ref a, TMS.LT, out res)) {
                 return !res;
             }
-            throw new Exception("arithmetic error");
+            if (a.Type.LuaName() == b.Type.LuaName())
+                throw new Exception($"attempt to compare two {a.Type.LuaName()} values");
+            else
+                throw new Exception($"attempt to compare {a.Type.LuaName()} with {b.Type.LuaName()}");
         }
 
         public static LuaValue FromObject(object o)

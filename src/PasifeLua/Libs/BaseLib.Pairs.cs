@@ -7,11 +7,14 @@ namespace PasifeLua.Libs
 {
     public static partial class BaseLib
     {
-        static int pairsimpl(LuaState s, IEnumerator<KeyValuePair<LuaValue,LuaValue>> it)
+        static int pairsimpl(LuaState s)
         {
-            if (it.MoveNext()) {
-                s.Push(it.Current.Key);
-                s.Push(it.Current.Value);
+            var tab = s.Value(1).Table();
+            var k = s.Value(2);
+            if (!(k = tab.NextKey(k)).IsNil())
+            {
+                s.Push(k);
+                s.Push(tab[k]);
                 return 2;
             } else {
                 s.Push(new LuaValue(LuaType.Nil));
@@ -34,13 +37,14 @@ namespace PasifeLua.Libs
             }
         }
 
+        private static DelegateClrFunction pairsDel = new DelegateClrFunction(pairsimpl);
+
         public static int pairs(LuaState state)
         {
             if (state.Value(1).Type == LuaType.Table)
             {
                 var tab = state.Value(1).Table();
-                var it = tab.GetEnumerator();
-                state.Push(new LuaValue(new DelegateClrFunction((s) => { return pairsimpl(s, it); })));
+                state.Push(new LuaValue(pairsDel));
             } 
             else if (state.Value(1).Type == LuaType.UserData)
             {
@@ -61,7 +65,7 @@ namespace PasifeLua.Libs
                 throw new Exception("cannot iterate on type");
             }
             state.Push(state.Value(1));
-            state.Push(0);
+            state.Push(LuaValue.Nil);
             return 3;
         }
     }

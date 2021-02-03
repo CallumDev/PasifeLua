@@ -50,7 +50,7 @@ namespace PasifeLua.Libs
         public static int LuaLOptInt(LuaState L, int pos, int def) => LuaLOptInteger(L, pos, def);
         public static int LuaLOptInteger(LuaState L, int pos, int def)
         {
-            if (L.Top >= pos)
+            if (L.GetTop() >= pos)
             {
                 if (L.Value(pos).TryGetNumber(out double n))
                     return (int) n;

@@ -43,7 +43,7 @@ namespace PasifeLua.Interop
         }
         public override int Run(LuaState state)
         {
-            int paramCount = state.Top;
+            int paramCount = state.GetTop();
             if (Instance) paramCount--;
             if (paramCount < 0) throw new Exception("Instance method needs to be called with ':' syntax or self parameter.");
             if (paramCount == 0) {

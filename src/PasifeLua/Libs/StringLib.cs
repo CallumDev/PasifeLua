@@ -44,7 +44,6 @@ namespace PasifeLua.Libs
             char         c = '\0';
             StringBuilder sb = new StringBuilder(s.Length + 4);
             sb.Append('"');
-            String     t;
             for (int i = 0; i < s.Length; i++) {
                 c = s[i];
                 switch (c) {

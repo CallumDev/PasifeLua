@@ -24,7 +24,10 @@ namespace PasifeLua.Tests
             var writer = new StringWriter();
             var state = new LuaState() {StandardOut = writer};
             state.DoString("arg = {}");
-            state.DoString(File.ReadAllText(file), Path.GetFileName(file));
+            state.DoString("package.path = './Tests/Modules/?.lua'");
+            var txt = File.ReadAllText(file);
+            if (txt.StartsWith("#!")) txt = txt.Substring(txt.IndexOf('\n'));
+            state.DoString(txt, Path.GetFileName(file));
             return writer.ToString().Trim();
         }
         

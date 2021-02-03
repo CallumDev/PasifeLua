@@ -6,8 +6,7 @@ namespace PasifeLua.Libs
     {
         public static int getinfo(LuaState state)
         {
-            state.Push(new LuaValue());
-            return 1;
+            return 0;
         }
         
         private static (string, DelegateClrFunction)[] funcs =
@@ -17,7 +16,7 @@ namespace PasifeLua.Libs
         
         public static void Register(LuaState state)
         {
-            var package = LibUtils.CreateLib(state, "debug");
+            var package = LibUtils.CreateLib(state, "debug", funcs);
         }
     }
 }

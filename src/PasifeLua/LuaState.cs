@@ -22,7 +22,17 @@ namespace PasifeLua
         private LuaTable loadedPackages;
 
         public TextWriter StandardOut;
+        public TextWriter StandardError;
+        public TextReader StandardInput;
+        
         private LuaTable stringLib;
+
+        internal LuaIOFile IO_stdin;
+        internal LuaIOFile IO_stdout;
+        internal LuaIOFile IO_stderr;
+        internal LuaIOFile IO_currentout;
+        internal LuaIOFile IO_currentin;
+        
         public LuaState()
         {
             Registry = new LuaTable();
@@ -33,6 +43,13 @@ namespace PasifeLua
             Registry["_LOADED"] = new LuaValue(LuaType.Table, loadedPackages);
             luaRegistry = new LuaValue(LuaType.Table, Registry);
             StandardOut = Console.Out;
+            StandardInput = Console.In;
+            StandardError = Console.Error;
+            IO_stdin = new LuaStandardIOFile(null, () => StandardInput, "stdin");
+            IO_stdout = new LuaStandardIOFile(() => StandardOut, null, "stdout");
+            IO_stderr = new LuaStandardIOFile(() => StandardError, null, "stderr");
+            IO_currentout = IO_stdout;
+            IO_currentin = IO_stdin;
             StackInit();
             BaseLib.Register(this);
             BitLib.Register(this);
@@ -76,7 +93,7 @@ namespace PasifeLua
             }
             catch (Exception e)
             {
-                throw new Exception($"{ErrorRecover(orig, oldtop)} {e.Message}", e);
+                throw new Exception($"{ErrorRecover(orig, oldtop)}: {e.Message}", e);
             }
             LuaValue returnVal = new LuaValue();
             if (ret) {
@@ -208,7 +225,7 @@ namespace PasifeLua
                     var errfunc = _Stack[errIdx];
                     CallFunction(errfunc, false);
                 }
-                var v = new LuaValue($"{ErrorRecover(orig, oldtop)} {e.Message}");
+                var v = new LuaValue($"{ErrorRecover(orig, oldtop)}: {e.Message}");
                 _Stack[func] = v;
                 return false;
             }

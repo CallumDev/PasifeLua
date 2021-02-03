@@ -16,6 +16,8 @@ namespace PasifeLua.Interop
             lock (Descriptors) {
                 if (Descriptors.TryGetValue(t, out d))
                     lastDescriptor.Value = d;
+                else if (t.BaseType != null && Descriptors.TryGetValue(t.BaseType, out d))
+                    lastDescriptor.Value = d;
             }
             return d;
         }

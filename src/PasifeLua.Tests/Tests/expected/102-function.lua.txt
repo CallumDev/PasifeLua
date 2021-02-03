@@ -1,0 +1,52 @@
+1..51
+ok 1 - -f
+ok 2
+ok 3 - #f
+ok 4
+ok 5 - not f
+ok 6
+ok 7 - f + 10
+ok 8
+ok 9 - f - 2
+ok 10
+ok 11 - f * 3.14
+ok 12
+ok 13 - f / -7
+ok 14
+ok 15 - f % 4
+ok 16
+ok 17 - f ^ 3
+ok 18
+ok 19 - f .. 'end'
+ok 20
+ok 21 - f == f
+ok 22
+ok 23 - f ~= g
+ok 24
+ok 25
+ok 26
+ok 27 - f == 1
+ok 28
+ok 29 - f ~= 1
+ok 30
+ok 31 - f < g
+ok 32
+ok 33 - f <= g
+ok 34
+ok 35 - f > g
+ok 36
+ok 37 - f >= g
+ok 38
+ok 39 - f < 0
+ok 40
+ok 41 - f <= 0
+ok 42
+ok 43 - f > 0
+ok 44
+ok 45 - f >= 0
+ok 46
+ok 47 - index
+ok 48
+ok 49 - index
+ok 50
+ok 51

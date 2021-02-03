@@ -13,7 +13,6 @@ namespace PasifeLua
         private int top;
         private int stack_last;
 
-        public int Top => top;
         void StackInit()
         {
             _Stack = new LuaValue[BASIC_STACK_SIZE];

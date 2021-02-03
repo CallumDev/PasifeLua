@@ -564,6 +564,48 @@ namespace PasifeLua
 			}
 			return r;
 		} // proc remove
+		
+		public LuaValue NextKey(LuaValue next)
+		{
+			LuaValue NextHashKey(int startIndex)
+			{
+				var entryIndex = Array.FindIndex(entries, startIndex, c => c.hashCode != -1);
+				return entryIndex == -1 ? LuaValue.Nil : entries[entryIndex].key;
+			} // func NextHashKey
+
+			LuaValue NextHashKey2(int currentIndex)
+			{
+				if (currentIndex < 0 || currentIndex == entries.Length - 1)
+					return LuaValue.Nil;
+				return NextHashKey(currentIndex + 1);
+			} // func NextHashKey2
+
+			if(next.IsNil())
+			{
+				if (arrayLength == 0)
+					return NextHashKey(0);
+				else
+					return new LuaValue(1);
+			}
+			else if (IsIntKey(next, out int k))
+			{
+				if (k < arrayLength)
+					return new LuaValue(k + 1);
+				else if (k < arrayList.Length)
+				{
+					// zero based until, now
+					while (k < arrayList.Length)
+					{
+						if (!arrayList[k].IsNil())
+							return new LuaValue(k + 1);
+						k++;
+					}
+					return NextHashKey(0);
+				} else
+					return NextHashKey2(FindKey(next, next.GetHashCode() & 0x7FFFFFFF));
+			}
+			return NextHashKey2(FindKey(next, next.GetHashCode() & 0x7FFFFFFF));
+		}
 
 		public override string ToString()
 		{

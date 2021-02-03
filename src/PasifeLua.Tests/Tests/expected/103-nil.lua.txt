@@ -1,0 +1,25 @@
+1..24
+ok 1 - -nil
+ok 2 - #nil
+ok 3 - not nil
+ok 4 - nil + 10
+ok 5 - nil - 2
+ok 6 - nil * 3.14
+ok 7 - nil / -7
+ok 8 - nil % 4
+ok 9 - nil ^ 3
+ok 10 - nil .. 'end'
+ok 11 - nil == nil
+ok 12 - nil ~= nil
+ok 13 - nil == 1
+ok 14 - nil ~= 1
+ok 15 - nil < nil
+ok 16 - nil <= nil
+ok 17 - nil > nil
+ok 18 - nil >= nil
+ok 19 - nil < 0
+ok 20 - nil <= 0
+ok 21 - nil > 0
+ok 22 - nil >= 0
+ok 23 - index
+ok 24 - index

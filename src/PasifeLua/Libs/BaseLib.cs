@@ -151,6 +151,30 @@ namespace PasifeLua.Libs
             state.Push(table[key]);
             return 1;
         }
+
+        
+        public static int pcall(LuaState state)
+        {
+            state.Push(new LuaValue());
+            state.Insert(1); //create space for status result
+            bool status = state.PCallK(state.GetTop() - 2, Constants.LUA_MULTRET, 0);
+            state.Push(new LuaValue(status));
+            state.Replace(1);
+            return state.GetTop();
+        }
+
+        public static int xpcall(LuaState state)
+        {
+            int n = state.GetTop();
+            LibUtils.ArgCheck(n >= 2, 2, "xpcall", "value expected");
+            state.Push(state.Value(1)); //exchange function
+            state.Value(1) = state.Value(2); //and error handler
+            state.Replace(2);
+            bool status = state.PCallK(n - 2, Constants.LUA_MULTRET, 1);
+            state.Push(new LuaValue(status));
+            state.Replace(1);
+            return state.GetTop();
+        }
         
 
         private static (string, DelegateClrFunction)[] funcs =
@@ -168,6 +192,8 @@ namespace PasifeLua.Libs
             ("ipairs", new DelegateClrFunction(ipairs)),
             ("pairs", new DelegateClrFunction(pairs)),
             ("rawget", new DelegateClrFunction(rawget)),
+            ("pcall", new DelegateClrFunction(pcall)),
+            ("xpcall", new DelegateClrFunction(xpcall))
         };
         
         public static void Register(LuaState state)

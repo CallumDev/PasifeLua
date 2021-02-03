@@ -58,6 +58,23 @@ namespace PasifeLua
                 }
             }
         }
+        
+        public void Insert(int idx)
+        {
+            int p = idx > 0 ? (ci.Func + idx) : top + idx;
+            int q = top;
+            for (q = top; q > p; q--) {
+                _Stack[q] = _Stack[q - 1];
+            }
+            _Stack[p] = _Stack[top];
+        }
+        
+        public void Replace(int idx)
+        {
+            api_checknelems(1);
+            Value(idx) = _Stack[top - 1];
+            top--;
+        }
 
         ref LuaValue index2addr(int idx)
         {

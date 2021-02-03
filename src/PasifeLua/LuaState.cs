@@ -189,6 +189,30 @@ namespace PasifeLua
             Call(func, nresults, 0);
             adjustresults(nresults);
         }
+
+        internal bool PCallK(int nargs, int nresults, int errhandler)
+        {
+            var orig = ci;
+            var oldtop = top;
+            var func = top - (nargs + 1);
+            int errIdx = ci.Func + errhandler;
+            try
+            {
+                Call(func, nresults, 0);
+                adjustresults(nresults);
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (errhandler != 0) {
+                    var errfunc = _Stack[errIdx];
+                    CallFunction(errfunc, false);
+                }
+                var v = new LuaValue($"{ErrorRecover(orig, oldtop)} {e.Message}");
+                _Stack[func] = v;
+                return false;
+            }
+        }
         
     }
 }
